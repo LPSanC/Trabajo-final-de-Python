@@ -2,12 +2,16 @@
 import json
 
 
-# PUNTO A: Excepción personalizada
+# EJERCICIO 2 - ECOTECH SOLUTIONS
+# Modelo de productos, excepciones y persistencia
+
+
+# PUNTO A: Excepcion personalizada
 class StockInvalidoError(Exception):
     pass
 
 
-# Clase base
+# Clase base: Dispositivo Ecologico
 class DispositivoEcológico:
 
     def __init__(self, nombre, precio, stock):
@@ -16,6 +20,7 @@ class DispositivoEcológico:
         self._stock = 0
         self.stock = stock
 
+    # Encapsulamiento del stock
     @property
     def stock(self):
         return self._stock
@@ -28,6 +33,7 @@ class DispositivoEcológico:
             )
         self._stock = cantidad
 
+    # Ficha tecnica general
     def ficha_tecnica(self):
         return (
             f"Producto: {self.nombre} | "
@@ -35,6 +41,7 @@ class DispositivoEcológico:
             f"Stock: {self.stock}"
         )
 
+    # Convertir objeto a diccionario
     def a_diccionario(self):
         return {
             "tipo": "DispositivoEcológico",
@@ -44,16 +51,18 @@ class DispositivoEcológico:
         }
 
 
-# Clase hija: Herencia y polimorfismo
+# Clase hija: Panel Solar
 class PanelSolar(DispositivoEcológico):
 
     def __init__(self, nombre, precio, stock,
                  potencia_watts, eficiencia):
 
         super().__init__(nombre, precio, stock)
+
         self.potencia_watts = potencia_watts
         self.eficiencia = eficiencia
 
+    # Polimorfismo: ficha personalizada
     def ficha_tecnica(self):
         return (
             f"{super().ficha_tecnica()} | "
@@ -63,22 +72,24 @@ class PanelSolar(DispositivoEcológico):
 
     def a_diccionario(self):
         datos = super().a_diccionario()
+
         datos["tipo"] = "PanelSolar"
         datos["potencia_watts"] = self.potencia_watts
         datos["eficiencia"] = self.eficiencia
+
         return datos
 
 
-# PUNTO B: Persistencia en JSON
+# PUNTO B: Gestion del inventario
 class GestorInventario:
 
     def guardar_catalogo_json(self, lista_dispositivos,
                               ruta_archivo):
 
-        datos = [
-            dispositivo.a_diccionario()
-            for dispositivo in lista_dispositivos
-        ]
+        datos = []
+
+        for dispositivo in lista_dispositivos:
+            datos.append(dispositivo.a_diccionario())
 
         with open(ruta_archivo, "w",
                   encoding="utf-8") as archivo:
@@ -94,6 +105,7 @@ class GestorInventario:
 # BLOQUE PRINCIPAL DE PRUEBA
 if __name__ == "__main__":
 
+    # Crear productos
     panel = PanelSolar(
         "Panel Solar Eco 400",
         250000,
@@ -102,32 +114,39 @@ if __name__ == "__main__":
         21.5
     )
 
-    dispositivo = DispositivoEcológico(
-        "Lámpara LED Ecológica",
+    lampara = DispositivoEcológico(
+        "Lampara LED Ecologica",
         15000,
         30
     )
 
-    # Prueba de stock negativo
+    # Probar un stock incorrecto
     try:
         panel.stock = -5
 
     except StockInvalidoError as error:
         print("Error controlado:", error)
 
-    # Catálogo de productos válidos
-    catalogo = [panel, dispositivo]
+    # Crear catalogo valido
+    catalogo = [panel, lampara]
+
+    # Mostrar fichas tecnicas
+    print("\n=== CATALOGO ECOTECH ===")
 
     for producto in catalogo:
         print(producto.ficha_tecnica())
 
-    # Guardar archivo JSON
+    # Guardar los productos en JSON
     gestor = GestorInventario()
 
     gestor.guardar_catalogo_json(
         catalogo,
         "catalogo_ecotech.json"
     )
+
+    print("\nCatalogo guardado correctamente")
+    print("Archivo: catalogo_ecotech.json")
+
 
     print(
         "Catálogo guardado correctamente "
